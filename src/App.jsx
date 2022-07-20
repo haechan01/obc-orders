@@ -7,7 +7,7 @@ import Register from './pages/Auth/Register';
 import Reset from './pages/Auth/Reset';
 import Order from './pages/Catalog/Order';
 import MyOrder from './pages/Checkout/MyOrder';
-
+import Orders from './pages/Orders';
 function App() {
   return (
     <Router>
@@ -18,6 +18,7 @@ function App() {
         <Route path="/reset" element={<Reset />} />
         <Route path="/order" element={<Order />} />
         <Route path="/cart" element={<MyOrder />} />
+        <Route path="/orders" element={<Orders />} />
       </Routes>
     </Router>
   );
