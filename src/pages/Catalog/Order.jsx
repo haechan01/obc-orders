@@ -3,6 +3,7 @@ import { useRecoilValue } from 'recoil';
 import { currentUserState } from '../../models/users';
 import { collection, addDoc } from 'firebase/firestore';
 import { db } from '../../models/firebase';
+import { useNavigate } from 'react-router-dom';
 
 const Order = () => {
   const [clientName, setClientName] = useState('');
@@ -14,7 +15,8 @@ const Order = () => {
   const [orderPeriod, setOrderPeriod] = useState('');
 
   const currentUser = useRecoilValue(currentUserState);
-
+  const navigate = useNavigate();
+  console.log(currentUser);
   // 랜덤 송장번호
   const generateRandomCode = n => {
     let str = '';
@@ -29,6 +31,7 @@ const Order = () => {
     try {
       await addDoc(collection(db, 'Orders'), {
         userName: currentUser.name,
+        userID: currentUser.uid,
         orderNumber: generateRandomCode(10),
         clientName: clientName,
         salesName: salesName,
@@ -38,29 +41,45 @@ const Order = () => {
         paymentType: paymentType,
         orderPeriod: orderPeriod,
       });
+      navigate('/cart');
     } catch (err) {
       console.error(err);
       alert(err.message);
     }
-    alert(
-      currentUser.name +
-        ' / ' +
-        generateRandomCode(10) +
-        ' / ' +
-        clientName +
-        ' / ' +
-        salesName +
-        ' / ' +
-        salesContact +
-        ' / ' +
-        beerType +
-        ' / ' +
-        beerQuantity +
-        ' / ' +
-        paymentType +
-        ' / ' +
-        orderPeriod
-    );
+  };
+
+  const testJandiMsg = e => {
+    // let jsonString = e.postData.getDataAsString();
+    // let jsonData = JSON.parse(jsonString);
+    // let requestString = jsonData.data;
+
+    // 전체공지를 전송할 대화방의 리스트
+    // 잔디 커넥트 Incoming Webhook url 리스트. url은 큰따옴표("")로 감싸고 컴마(,) 구분으로 작성해주세요.
+    // 관리를 위해 주석에 어느 대화방의 url인지 정보 적어두시기 바랍니다.
+    let jandi_incoming_url_list = [
+      '<https://wh.jandi.com/connect-api/webhook/24484792/05e44350d4d6e8bcce9f9c844ed91983>', // <팀, 대화방 정보>
+    ];
+
+    // JANDI MESSAGE
+    let jandi_headers = {
+      Accept: 'application/vnd.tosslab.jandi-v2+json',
+      'Content-type': 'application/json',
+    };
+    let jandi_formData = {
+      body: '전체공지 전달드립니다.',
+      connectColor: '#00C473',
+      connectInfo: [{ description: e }],
+    };
+    let jandi_options = {
+      method: 'POST',
+      payload: JSON.stringify(jandi_formData),
+      headers: jandi_headers,
+    };
+
+    for (let jandi_incoming_url of jandi_incoming_url_list) {
+      response = UrlFetchApp.fetch(jandi_incoming_url, jandi_options);
+      Logger.log(response);
+    }
   };
 
   return (
@@ -393,6 +412,7 @@ const Order = () => {
                 type="submit"
                 className="mx-auto rounded-md text-white py-2 px-4 bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 onClick={() => submitOrder()}
+                // onClick={() => testJandiMsg('testing jandi msg')}
               >
                 <span className="absolute left-0 inset-y-0 flex items-center pl-3"></span>
                 Submit Order

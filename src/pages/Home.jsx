@@ -20,7 +20,7 @@ const Home = () => {
       const data = doc.docs[0].data();
       setName(data.name);
       setCurrentUser({
-        id: data.uid,
+        uid: data.uid,
         name: data.name,
         email: data.email,
       });
