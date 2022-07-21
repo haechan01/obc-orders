@@ -8,6 +8,9 @@ import Reset from './pages/Auth/Reset';
 import Order from './pages/Catalog/Order';
 import MyOrder from './pages/Checkout/MyOrder';
 import Orders from './pages/Orders';
+import Address from './pages/Address'
+import { RecoilRoot } from "recoil";
+
 function App() {
   return (
     <Router>
@@ -19,6 +22,7 @@ function App() {
         <Route path="/order" element={<Order />} />
         <Route path="/cart" element={<MyOrder />} />
         <Route path="/orders" element={<Orders />} />
+        <Route path="/address" element={<Address />} />
       </Routes>
     </Router>
   );

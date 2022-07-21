@@ -1,5 +1,11 @@
 import React, { useState } from 'react';
-import { useRecoilValue } from 'recoil';
+import PopupDom from './PopupDom';
+import PopupPostCode from './PopupPostCode';
+import { useRecoilState, useRecoilValue } from 'recoil';
+import {userAddressState} from '../models/addressAtom';
+
+
+
 
 const Orders = () => {
     const [clientName, setClientName] = useState('');
@@ -7,9 +13,61 @@ const Orders = () => {
     const [postcode, setPostcode] = useState('');
     const [primaryAddress, setPrimaryAddress] = useState('');
     const [detailAddress, setDetailAddress] = useState('');
-    const [ordererAddress, setOrdererAddress] = useState(true);
+    const [ordererDelivery, setOrdererDelivery] = useState(true);
+    const [individualDelivery, setIndividualDelivery] = useState(true);
     const [cardPayment, setCardPayment] = useState(false)
-    console.log(clientName)
+    const [bankPayment, setBankPayment] = useState(false)
+    
+    
+    const handleOrdererDelivery = (e) => {
+        
+        setOrdererDelivery(e.target.checked)
+
+        if (ordererDelivery == false) {
+            setOrdererDelivery(true)
+        } else {
+            setOrdererDelivery(false)
+        }
+        
+        return (
+            Boolean(ordererDelivery)
+        )
+
+    }
+    const handlePaymentCheckbox = (e) => {
+        setIndividualDelivery(e.target.checked)
+
+        if (individualDelivery == false) {
+            setIndividualDelivery(true)
+        } else {
+            setIndividualDelivery(false)
+        }
+        
+        return (
+            Boolean(individualDelivery)
+        )
+    }
+
+
+    // 팝업창 상태 관리
+    const [isPopupOpen, setIsPopupOpen] = useState(false)
+ 
+	// 팝업창 열기
+    const openPostCode = () => {
+        setIsPopupOpen(true)
+    }
+ 
+	// 팝업창 닫기
+    const closePostCode = () => {
+        setIsPopupOpen(false)
+    }
+
+
+    const userAddress = useRecoilValue(userAddressState)
+    //console.log(cardPayment)
+    console.log(bankPayment)
+    console.log(userAddress.address)
+    console.log(userAddress.postcode)
     return(
         <div className="bg-white">
             <div className="px-4 sm:px-6 lg:px-8 py-8 w-full">
@@ -45,14 +103,15 @@ const Orders = () => {
                             <input
                                 type="checkbox"
                                 className="form-checkbox checkbox-gray"
-                                value={ordererAddress}
-                                onChange={e => setOrdererAddress(e.target.value)}
+                                value = {ordererDelivery}
+                                disabled= {!individualDelivery}
+                                onChange={e => handleOrdererDelivery(e)}
                             />
                             
                             <span className="text-sm text-slate-800 ml-2">주문자의 주소 또는 다른 한개의 주소로 일괄 배송</span>
                         
                         </div>
-                        <div class="flex-grow border-t border-gray-400 ml-3"></div>
+                        <div className="flex-grow border-t border-gray-400 ml-3"></div>
                         <div className="bg-gray-100 p-5 rounded-sm ml-3 lg:w-72 xl:w-300  mb-3">
                     
                             <div className="">
@@ -69,7 +128,7 @@ const Orders = () => {
                                     onChange={e => setClientName(e.target.value)}
                                 />
                                 </div>
-                                <div class="flex-grow border-t border-gray-400 ml-3 mb-3"></div>
+                                <div className="flex-grow border-t border-gray-400 ml-3 mb-3"></div>
                                 <div className="mb-2">
                                     <input
                                         id="recipientContact"
@@ -81,29 +140,44 @@ const Orders = () => {
                                     />
                                 </div>
                                 
-                                <div class="flex-grow border-t border-gray-400 ml-3 mb-3"></div>
-                                <div className="mb-2">
+                                <div className="flex-grow border-t border-gray-400 ml-3 mb-3"></div>
+                                <div className="buttonIn mb-2">
+                                
                                     <input
                                         id="postcode"
                                         required
                                         className=" border-none w-full px-3 py-2 bg-gray-100 placeholder-gray-400  rounded-t-md focus:outline-none sm:text-sm"
                                         placeholder="우편번호"
-                                        value={postcode}
+                                        disabled={true}
+                                        value={userAddress.postcode}
+
                                         onChange={e => setPostcode(e.target.value)}
                                     />
+                                    
+                                    <button type='button' className= 'absolute top-30 right-60 h-10 w-45 text-black rounded-t-md bg-white hover:bg-blue sm:text-sm' onClick={openPostCode}>우편번호 검색</button>
+                                    
+            
+                                    <div id='popupDom'>
+                                        {isPopupOpen && (
+                                            <PopupDom>
+                                                <PopupPostCode onClose={closePostCode} />
+                                            </PopupDom>
+                                        )}
+                                    </div>
                                 </div>
-                                <div class="flex-grow border-t border-gray-400 ml-3 mb-3"></div>
+                                <div className="flex-grow border-t border-gray-400 ml-3 mb-3"></div>
                                 <div className="mb-2">
                                     <input
                                         id="primaryAddress"
                                         required
                                         className=" border-none w-full px-3 py-2 bg-gray-100 placeholder-gray-400  rounded-t-md focus:outline-none sm:text-sm"
                                         placeholder="기본주소"
-                                        value={primaryAddress}
+                                        disabled={true}
+                                        value={userAddress.address}
                                         onChange={e => setPrimaryAddress(e.target.value)}
                                     />
                                 </div>
-                                <div class="flex-grow border-t border-gray-400 ml-3 mb-3"></div>
+                                <div className="flex-grow border-t border-gray-400 ml-3 mb-3"></div>
                                 <div className="mb-2">
                                     <input
                                         id="detailAddress"
@@ -114,21 +188,22 @@ const Orders = () => {
                                         onChange={e => setDetailAddress(e.target.value)}
                                     />
                                 </div>
-                                <div class="flex-grow border-t border-gray-400 mb-3"></div>
+                                <div className="flex-grow border-t border-gray-400 mb-3"></div>
                             </div>
                         </div>
                         <div className="ml-3">
                             <input
                                 type="checkbox"
                                 className="form-checkbox checkbox-gray"
-                                value={ordererAddress}
-                                onChange={e => setOrdererAddress(e.target.value)}
+                                value={ordererDelivery}
+                                disabled= {!ordererDelivery}
+                                onChange={e => handlePaymentCheckbox(e)}
                             />
                             
                             <span className="text-sm text-slate-800 ml-2">수령인(들)에게 개별 배송 (배송주소록 추후 입력, 카드결제 불가)</span>
                         
                         </div>
-                        <div class="flex-grow border-t border-gray-400 ml-3"></div>
+                        <div className="flex-grow border-t border-gray-400 ml-3"></div>
                     </div>
                     
                     
@@ -142,10 +217,11 @@ const Orders = () => {
                                 <input
                                     type="checkbox"
                                     className="form-checkbox checkbox-gray"
-                                    value={ordererAddress}
-                                    onChange={e => setOrdererAddress(e.target.value)}
+                                    value={cardPayment}
+                                    disabled= {Boolean(ordererDelivery || bankPayment )}
+                                    onChange={e => setCardPayment(e.target.checked)}
                                 />
-                                <label class="form-check-label inline-block text-gray-800 opacity-50" for="flexCheckDisabled">
+                                <label className="form-check-label inline-block text-gray-800 opacity-50" htmlFor="flexCheckDisabled">
                                 <span className="text-sm text-slate-800 ml-2">상품 수령 시 카드 결제 (총 주문액의 10% 계약금 입금 필요)</span>
                                 </label>
                                 
@@ -155,10 +231,11 @@ const Orders = () => {
                                 <input
                                     type="checkbox"
                                     className="form-checkbox checkbox-gray"
-                                    value={ordererAddress}
-                                    onChange={e => setOrdererAddress(e.target.value)}
+                                    value={bankPayment}
+                                    disabled= {Boolean((ordererDelivery && individualDelivery) || cardPayment)}
+                                    onChange={e => setBankPayment(e.target.checked)}
                                 />
-                                <label class="form-check-label inline-block text-gray-800 opacity-50" for="flexCheckDisabled">
+                                <label className="form-check-label inline-block text-gray-800 opacity-50" htmlFor="flexCheckDisabled">
                                     
                                 <span className="text-sm text-slate-800 ml-2">무통장 입급 (국민 1234-0983-9374 (주)오리지널비어컴퍼니)</span>
                                 </label>
